@@ -1,4 +1,7 @@
 #include "server.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+
 
 Server::Server() {
     MyServer = new QTcpServer();
@@ -15,9 +18,23 @@ Server::Server() {
     }
 }
 
-void Server::initializeRules()
+void Server::initializeRoles()
 {
+    ///notify client #1
+    QJsonObject role1;
+    role1["MessageType"]="role";
+    role1["role"]="plant";
+    QJsonDocument jsonDoc1(role1);
+    QByteArray jsonData1 = jsonDoc1.toJson();
+    MySockets[0]->write(jsonData1);
 
+    ///notify client #2
+    QJsonObject role2;
+    role1["MessageType"]="role";
+    role1["role"]="zombie";
+    QJsonDocument jsonDoc2(role1);
+    QByteArray jsonData2 = jsonDoc2.toJson();
+    MySockets[1]->write(jsonData2);
 }
 
 void Server::NewConnection()
@@ -33,7 +50,38 @@ void Server::NewConnection()
 
 void Server::ReadingData(QTcpSocket *_socket)
 {
-    //it should give a json file and send it to another client
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(_socket->readAll());
+    QJsonObject jsonObj=jsonDoc.object();
+    if(jsonObj["MessageType"]=="drop")
+    {
+        if(_socket->objectName()=="Client 1")
+        {
+            MySockets[1]->write(_socket->readAll());
+        }
+        else if(_socket->objectName()=="Client 2")
+        {
+            MySockets[0]->write(_socket->readAll());
+        }
+    }
+    else if (jsonObj["MessageType"]=="finished" )
+    {
+        ///notify client #1
+        QJsonObject role1;
+        role1["MessageType"]="role";
+        role1["role"]="zombie";
+        QJsonDocument jsonDoc1(role1);
+        QByteArray jsonData1 = jsonDoc1.toJson();
+        MySockets[0]->write(jsonData1);
+
+        ///notify client #2
+        QJsonObject role2;
+        role1["MessageType"]="role";
+        role1["role"]="plant";
+        QJsonDocument jsonDoc2(role1);
+        QByteArray jsonData2 = jsonDoc2.toJson();
+        MySockets[1]->write(jsonData2);
+    }
+    // it should give a json file and send it to another client
     // if the clients send a boolian to server it means that the game has finished
     // if the boolian was 0 it means that was first rand and they should play again
     // if the boolian was 1 it means that they play for two rond and the game is finished
@@ -49,7 +97,7 @@ void Server::ConnectedToServer()
 {
     qDebug() << "Connected Successfully\n";
     if(MySockets.size()==2)
-        //call a function to send data
+        initializeRoles();
     //we should give the clients a boolian to see one of them as a plant and other as a zombie
 }
 
