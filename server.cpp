@@ -4,17 +4,16 @@
 
 
 Server::Server() {
+    qDebug() << "Im here";
     MyServer = new QTcpServer();
-    MyServer->listen(QHostAddress::Any , 1025);
+    MyServer->listen(QHostAddress::Any , 1500);
     // This use to see if our server is listening or not
     if(!MyServer->isListening()){
         qDebug() << "ERROR\n";
     }
     else{
         qDebug() << "Listening...\n";
-        while(true){
-            connect(MyServer , SIGNAL(newConnection()) , this , SLOT(NewConnection)); // This slot wait for new connection
-        }
+        connect(MyServer , SIGNAL(newConnection()) , this , SLOT(NewConnection())); // This slot wait for new connection
     }
 }
 
@@ -42,7 +41,11 @@ void Server::NewConnection()
     QTcpSocket * new_client = MyServer->nextPendingConnection();
     new_client->setObjectName("Client " + QString::number(MySockets.size() + 1));
     MySockets.append(new_client);
-    connect(new_client, &QTcpSocket::connected, this, &Server::ConnectedToServer);
+    qDebug() << "Connected Successfully\n";
+    if(MySockets.size()==2)
+        initializeRoles();
+
+    //connect(new_client, &QTcpSocket::connected, this, &Server::ConnectedToServer);
     connect(new_client, &QIODevice::readyRead, this, [this, new_client](){ ReadingData(new_client); });
     connect(new_client, &QIODevice::bytesWritten, this, [this, new_client](){ WritingData(new_client); });
     connect(new_client, &QAbstractSocket::disconnected, this, [this, new_client](){ DisconnectedFromServer(new_client); });
@@ -93,13 +96,13 @@ void Server::WritingData(QTcpSocket *_socket)
     //used to say that writing is finished
 }
 
-void Server::ConnectedToServer()
+/*oid Server::ConnectedToServer()
 {
     qDebug() << "Connected Successfully\n";
     if(MySockets.size()==2)
         initializeRoles();
     //we should give the clients a boolian to see one of them as a plant and other as a zombie
-}
+}*/
 
 void Server::DisconnectedFromServer(QTcpSocket *_socket)
 {

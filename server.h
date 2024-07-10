@@ -21,7 +21,7 @@ public slots:
     void NewConnection();
     void ReadingData(QTcpSocket *_socket);
     void WritingData(QTcpSocket *_socket);
-    void ConnectedToServer();
+    //void ConnectedToServer();
     void DisconnectedFromServer(QTcpSocket *_socket);
 };
 
