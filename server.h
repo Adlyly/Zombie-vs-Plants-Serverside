@@ -19,8 +19,8 @@ private :
    // int round;
 public slots:
     void NewConnection();
-    void ReadingData(QTcpSocket *_socket);
-    void WritingData(QTcpSocket *_socket);
+    void ReadingData();
+    void WritingData();
     //void ConnectedToServer();
     void DisconnectedFromServer(QTcpSocket *_socket);
 };
