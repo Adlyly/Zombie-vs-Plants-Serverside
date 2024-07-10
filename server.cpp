@@ -4,7 +4,6 @@
 
 
 Server::Server() {
-    qDebug() << "Im here";
     MyServer = new QTcpServer();
     MyServer->listen(QHostAddress::Any , 1500);
     // This use to see if our server is listening or not
@@ -46,24 +45,30 @@ void Server::NewConnection()
         initializeRoles();
 
     //connect(new_client, &QTcpSocket::connected, this, &Server::ConnectedToServer);
-    connect(new_client, &QIODevice::readyRead, this, [this, new_client](){ ReadingData(new_client); });
-    connect(new_client, &QIODevice::bytesWritten, this, [this, new_client](){ WritingData(new_client); });
+    connect(new_client, &QIODevice::readyRead, this, &Server::ReadingData);
+    connect(new_client, &QIODevice::bytesWritten, this,&Server::WritingData);
     connect(new_client, &QAbstractSocket::disconnected, this, [this, new_client](){ DisconnectedFromServer(new_client); });
 }
 
-void Server::ReadingData(QTcpSocket *_socket)
+void Server::ReadingData()
 {
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(_socket->readAll());
+    qDebug()<<"got a message from client";
+    QTcpSocket *_socket=dynamic_cast<QTcpSocket*>(sender());
+    QByteArray byteArray=_socket->readAll();
+    //byteArray.replace("\\n", "\n");
+    //byteArray.replace("\\\"", "\"");
+    qDebug()<<byteArray;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(byteArray);
     QJsonObject jsonObj=jsonDoc.object();
     if(jsonObj["MessageType"]=="drop")
     {
         if(_socket->objectName()=="Client 1")
         {
-            MySockets[1]->write(_socket->readAll());
+            MySockets[1]->write(byteArray);
         }
         else if(_socket->objectName()=="Client 2")
         {
-            MySockets[0]->write(_socket->readAll());
+            MySockets[0]->write(byteArray);
         }
     }
     else if (jsonObj["MessageType"]=="finished" )
@@ -90,8 +95,9 @@ void Server::ReadingData(QTcpSocket *_socket)
     // if the boolian was 1 it means that they play for two rond and the game is finished
 }
 
-void Server::WritingData(QTcpSocket *_socket)
+void Server::WritingData()
 {
+    QTcpSocket *_socket=dynamic_cast<QTcpSocket*>(sender());
     qDebug() << "written Successfully\n";
     //used to say that writing is finished
 }
