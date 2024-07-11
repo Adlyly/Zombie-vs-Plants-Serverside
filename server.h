@@ -16,7 +16,8 @@ private :
     QList<QTcpSocket*> MySockets;
     QList<bool> PlantOrZombie; //0 means zombie and 1 means plant,
     // each socket has it boolian in the same place ( i mean first socket refers to first boolian and second to second
-   // int round;
+    int flag=0;
+    // int round;
 public slots:
     void NewConnection();
     void ReadingData();

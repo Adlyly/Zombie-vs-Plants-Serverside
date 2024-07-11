@@ -71,8 +71,9 @@ void Server::ReadingData()
             MySockets[0]->write(byteArray);
         }
     }
-    else if (jsonObj["MessageType"]=="finished" )
+    else if (jsonObj["MessageType"]=="finished" && !flag)
     {
+        flag++;
         ///notify client #1
         QJsonObject role1;
         role1["MessageType"]="role";
