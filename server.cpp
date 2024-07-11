@@ -22,7 +22,8 @@ void Server::initializeRoles()
     QJsonObject role1;
     role1["MessageType"]="role";
     role1["role"]="plant";
-    role1["CompetitorName"]=MySockets[1]->objectName();
+    //role1["CompetitorName"]=MySockets[1]->objectName();
+    role1["CompetitorName"]=name2;
     QJsonDocument jsonDoc1(role1);
     QByteArray jsonData1 = jsonDoc1.toJson();
     MySockets[0]->write(jsonData1);
@@ -31,7 +32,8 @@ void Server::initializeRoles()
     QJsonObject role2;
     role2["MessageType"]="role";
     role2["role"]="zombie";
-    role2["CompetitorName"]=MySockets[0]->objectName();
+   // role2["CompetitorName"]=MySockets[0]->objectName();
+    role2["CompetitorName"]=name1;
     QJsonDocument jsonDoc2(role2);
     QByteArray jsonData2 = jsonDoc2.toJson();
     MySockets[1]->write(jsonData2);
@@ -61,7 +63,18 @@ void Server::ReadingData()
     QJsonObject jsonObj=jsonDoc.object();
     if(jsonObj["MessageType"]=="Introduce")
     {
-        socket->setObjectName(jsonObj["name"].toString());
+        if(socket->objectName()=="Client 1")
+        {
+            name1=jsonObj["name"].toString();
+            //socket->setObjectName(name1);
+            qDebug()<<name1;
+        }
+        if(socket->objectName()=="Client 2")
+        {
+            name2=jsonObj["name"].toString();
+            //socket->setObjectName(name2);
+            qDebug()<<socket->objectName();
+        }
         if(MySockets.size()==2)
             initializeRoles();
     }

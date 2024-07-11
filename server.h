@@ -14,10 +14,11 @@ public:
 private :
     QTcpServer* MyServer;
     QList<QTcpSocket*> MySockets;
-    QList<bool> PlantOrZombie; //0 means zombie and 1 means plant,
+    QList<bool> PlantOrZombie;
+    QString name1,name2;
+    //0 means zombie and 1 means plant,
     // each socket has it boolian in the same place ( i mean first socket refers to first boolian and second to second
     int flag=0;
-    // int round;
 public slots:
     void NewConnection();
     void ReadingData();
