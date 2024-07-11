@@ -22,14 +22,16 @@ void Server::initializeRoles()
     QJsonObject role1;
     role1["MessageType"]="role";
     role1["role"]="plant";
+    role1["CompetitorName"]=MySockets[1]->objectName();
     QJsonDocument jsonDoc1(role1);
     QByteArray jsonData1 = jsonDoc1.toJson();
     MySockets[0]->write(jsonData1);
 
     ///notify client #2
     QJsonObject role2;
-    role1["MessageType"]="role";
-    role1["role"]="zombie";
+    role2["MessageType"]="role";
+    role2["role"]="zombie";
+    role1["CompetitorName"]=MySockets[0]->objectName();
     QJsonDocument jsonDoc2(role1);
     QByteArray jsonData2 = jsonDoc2.toJson();
     MySockets[1]->write(jsonData2);
@@ -41,9 +43,6 @@ void Server::NewConnection()
     new_client->setObjectName("Client " + QString::number(MySockets.size() + 1));
     MySockets.append(new_client);
     qDebug() << "Connected Successfully\n";
-    if(MySockets.size()==2)
-        initializeRoles();
-
     //connect(new_client, &QTcpSocket::connected, this, &Server::ConnectedToServer);
     connect(new_client, &QIODevice::readyRead, this, &Server::ReadingData);
     connect(new_client, &QIODevice::bytesWritten, this,&Server::WritingData);
@@ -53,20 +52,26 @@ void Server::NewConnection()
 void Server::ReadingData()
 {
     qDebug()<<"got a message from client";
-    QTcpSocket *_socket=dynamic_cast<QTcpSocket*>(sender());
-    QByteArray byteArray=_socket->readAll();
+    QTcpSocket *socket=dynamic_cast<QTcpSocket*>(sender());
+    QByteArray byteArray=socket->readAll();
     //byteArray.replace("\\n", "\n");
     //byteArray.replace("\\\"", "\"");
     qDebug()<<byteArray;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(byteArray);
     QJsonObject jsonObj=jsonDoc.object();
-    if(jsonObj["MessageType"]=="drop")
+    if(jsonObj["MessageType"]=="Introduce")
     {
-        if(_socket->objectName()=="Client 1")
+        socket->setObjectName(jsonObj["name"].toString());
+        if(MySockets.size()==2)
+            initializeRoles();
+    }
+    else if(jsonObj["MessageType"]=="drop")
+    {
+        if(socket->objectName()=="Client 1")
         {
             MySockets[1]->write(byteArray);
         }
-        else if(_socket->objectName()=="Client 2")
+        else if(socket->objectName()=="Client 2")
         {
             MySockets[0]->write(byteArray);
         }
@@ -84,8 +89,8 @@ void Server::ReadingData()
 
         ///notify client #2
         QJsonObject role2;
-        role1["MessageType"]="role";
-        role1["role"]="plant";
+        role2["MessageType"]="role";
+        role2["role"]="plant";
         QJsonDocument jsonDoc2(role1);
         QByteArray jsonData2 = jsonDoc2.toJson();
         MySockets[1]->write(jsonData2);
