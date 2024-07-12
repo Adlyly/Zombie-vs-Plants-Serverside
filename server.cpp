@@ -31,8 +31,8 @@ void Server::initializeRoles()
     QJsonObject role2;
     role2["MessageType"]="role";
     role2["role"]="zombie";
-    role1["CompetitorName"]=MySockets[0]->objectName();
-    QJsonDocument jsonDoc2(role1);
+    role2["CompetitorName"]=MySockets[0]->objectName();
+    QJsonDocument jsonDoc2(role2);
     QByteArray jsonData2 = jsonDoc2.toJson();
     MySockets[1]->write(jsonData2);
 }
@@ -91,7 +91,7 @@ void Server::ReadingData()
         QJsonObject role2;
         role2["MessageType"]="role";
         role2["role"]="plant";
-        QJsonDocument jsonDoc2(role1);
+        QJsonDocument jsonDoc2(role2);
         QByteArray jsonData2 = jsonDoc2.toJson();
         MySockets[1]->write(jsonData2);
     }
