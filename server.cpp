@@ -18,6 +18,7 @@ Server::Server() {
 
 void Server::initializeRoles()
 {
+    flag =0;
     ///notify client #1
     QJsonObject role1;
     role1["MessageType"]="role";
