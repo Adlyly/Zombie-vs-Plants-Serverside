@@ -23,7 +23,6 @@ void Server::initializeRoles()
     QJsonObject role1;
     role1["MessageType"]="role";
     role1["role"]="plant";
-    //role1["CompetitorName"]=MySockets[1]->objectName();
     role1["CompetitorName"]=name2;
     QJsonDocument jsonDoc1(role1);
     QByteArray jsonData1 = jsonDoc1.toJson();
@@ -33,7 +32,6 @@ void Server::initializeRoles()
     QJsonObject role2;
     role2["MessageType"]="role";
     role2["role"]="zombie";
-   // role2["CompetitorName"]=MySockets[0]->objectName();
     role2["CompetitorName"]=name1;
     QJsonDocument jsonDoc2(role2);
     QByteArray jsonData2 = jsonDoc2.toJson();
@@ -46,7 +44,6 @@ void Server::NewConnection()
     new_client->setObjectName("Client " + QString::number(MySockets.size() + 1));
     MySockets.append(new_client);
     qDebug() << "Connected Successfully\n";
-    //connect(new_client, &QTcpSocket::connected, this, &Server::ConnectedToServer);
     connect(new_client, &QIODevice::readyRead, this, &Server::ReadingData);
     connect(new_client, &QIODevice::bytesWritten, this,&Server::WritingData);
     connect(new_client, &QAbstractSocket::disconnected, this, [this, new_client](){ DisconnectedFromServer(new_client); });
@@ -67,13 +64,11 @@ void Server::ReadingData()
         if(socket->objectName()=="Client 1")
         {
             name1=jsonObj["name"].toString();
-            //socket->setObjectName(name1);
             qDebug()<<name1;
         }
         if(socket->objectName()=="Client 2")
         {
             name2=jsonObj["name"].toString();
-            //socket->setObjectName(name2);
             qDebug()<<socket->objectName();
         }
         if(MySockets.size()==2)
@@ -117,19 +112,9 @@ void Server::ReadingData()
 
 void Server::WritingData()
 {
-    QTcpSocket *_socket=dynamic_cast<QTcpSocket*>(sender());
     qDebug() << "written Successfully\n";
     //used to say that writing is finished
 }
-
-/*oid Server::ConnectedToServer()
-{
-    qDebug() << "Connected Successfully\n";
-    if(MySockets.size()==2)
-        initializeRoles();
-    //we should give the clients a boolian to see one of them as a plant and other as a zombie
-}*/
-
 void Server::DisconnectedFromServer(QTcpSocket *_socket)
 {
     MySockets.removeOne(_socket);
